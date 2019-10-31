@@ -2,7 +2,6 @@
 #%matplotlib inline
 
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from numpy import genfromtxt
 import math
@@ -24,47 +23,43 @@ def func_h(theta, x1, x2):
 
 def func_j(theta):
     result = 0
-    for m in range(0, len(dataSet)):
-        result += math.pow(func_h(theta, area[m], rooms[m])-price[m], 2)
-    return result*0.5
+    for i in range(len(dataSet)):
+        result += (func_h(theta, area[i], rooms[i])-price[i])**2
+    return result * 0.5
 
 def func_dj(theta, index):
     result = 0
-    for m in range(0, len(dataSet)):
+    for i in range(len(dataSet)):
         xj = 1
-        if index == 1:
-            xj = area[m]
-        elif index == 2:
-            xj = rooms[m]
-        result += (func_h(theta, area[m], rooms[m])-price[m]) * xj
+        if index==1:
+            xj = area[i]
+        elif index==2:
+            xj = rooms[i]
+        result += (func_h(theta, area[i], rooms[i])-price[i])*xj
     return result
 
 def gradientDescent(rooms, price, area):
-    theta = [1, 0.001, 0.9]
-    lr = 0.01
-    epochs = 10
     thetas = []
-    thetas.append(np.array(theta))
+    theta = [1, 0.5, 0.5]
+    lr = 0.000000001
+    epochs = 200
+    gd = [0, 0, 0]
+    thetas.append(theta.copy())
     for i in range(epochs):
-        dtheta = []
-        # 计算梯度
+        for index in range(len(theta)):
+            gd[index] = func_dj(theta, index)
         for j in range(len(theta)):
-            dtheta.append(func_dj(theta, j))
-        norm = np.linalg.norm(dtheta, keepdims=True)
-        dtheta = dtheta/norm
-        # 梯度下降
-        theta -= dtheta * lr
-        thetas.append(theta)
+            theta[j] = theta[j] - gd[j]*lr
+        thetas.append(theta.copy())
     return thetas
 
 def demo_gd():
     thetas = gradientDescent(rooms, price, area)
-    errors = list(map(func_j, thetas))
     print(thetas)
-    print(errors)
     line_x = list(range(len(thetas)))
-    plt.plot(line_x, errors, c='b')
-    plt.scatter(line_x, errors, c='r')
+    line_y = list(map(func_j, thetas))
+    print(line_y)
+    plt.scatter(line_x, line_y, c='b')
     plt.show()
 
 if __name__ == '__main__':
